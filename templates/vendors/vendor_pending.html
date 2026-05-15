@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Pending Approvals — Vendor City{% endblock %}
+
+{% block content %}
+
+{# Page header #}
+<div class="flex justify-between items-center mb-6">
+    <div>
+        <h1 class="text-3xl font-bold text-blue-900">⏳ Pending Approvals</h1>
+        <p class="text-gray-500 mt-1">Vendors waiting for approval</p>
+    </div>
+    <span class="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full font-bold">
+        {{ pending_count }} pending
+    </span>
+</div>
+
+{# Messages #}
+{% for message in messages %}
+    <div class="mb-4 px-4 py-3 rounded text-sm
+        {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200
+        {% else %}bg-green-50 text-green-700 border border-green-200{% endif %}">
+        {{ message }}
+    </div>
+{% endfor %}
+
+{# Pending vendor cards #}
+{% for vendor in vendors %}
+    <div class="bg-white rounded-lg shadow-md p-6 mb-4 border-l-4 border-yellow-500">
+
+        <div class="flex justify-between items-start">
+            <div>
+                <h2 class="text-xl font-bold text-blue-900">{{ vendor.company_name }}</h2>
+                <p class="text-gray-500 text-sm">Reg: {{ vendor.registration_number }}</p>
+                <p class="text-gray-500 text-sm">📅 Registered: {{ vendor.date_registered|date:"F j, Y" }}</p>
+            </div>
+            <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-bold">
+                PENDING
+            </span>
+        </div>
+
+        <p class="text-gray-600 mt-3">🔧 {{ vendor.services_offered }}</p>
+        <p class="text-gray-600">📧 {{ vendor.email }} | 📞 {{ vendor.phone }}</p>
+
+        {# Certificate info #}
+        {% if vendor.certificate_name %}
+            {% if vendor.is_certificate_expired %}
+                <p class="text-red-600 text-sm mt-2 font-semibold">
+                    ⚠️ Certificate Expired: {{ vendor.certificate_name }} ({{ vendor.certificate_expiry }})
+                </p>
+            {% else %}
+                <p class="text-green-600 text-sm mt-2">
+                    ✅ Certificate: {{ vendor.certificate_name }} — expires {{ vendor.certificate_expiry }}
+                </p>
+            {% endif %}
+        {% else %}
+            <p class="text-gray-400 text-sm mt-2">⚠️ No certificate uploaded</p>
+        {% endif %}
+
+        {# Action buttons #}
+        <div class="flex gap-3 mt-4">
+            <a href="{% url 'vendor-detail' vendor.pk %}"
+               class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-200">
+                👁️ View Full Profile
+            </a>
+            <a href="{% url 'vendor-approve' vendor.pk %}"
+               class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700">
+                ✅ Approve
+            </a>
+            <a href="{% url 'vendor-reject' vendor.pk %}"
+               class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700">
+                ❌ Reject
+            </a>
+        </div>
+    </div>
+
+{% empty %}
+    <div class="bg-white rounded-lg shadow p-10 text-center text-gray-500">
+        <p class="text-xl mb-2">🎉 No pending vendors!</p>
+        <p class="text-sm">All vendors have been reviewed.</p>
+    </div>
+{% endfor %}
+
+{% endblock %}

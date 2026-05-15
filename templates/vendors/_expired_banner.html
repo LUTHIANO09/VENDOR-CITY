@@ -1,0 +1,6 @@
+{# Compliance banner — shown once when expired certificates exist #}
+{% if has_expired %}
+<div class="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded mb-6 text-sm font-medium">
+    ⚠️ <strong>Compliance Alert:</strong> Some vendors have expired certificates. Review them immediately.
+</div>
+{% endif %}

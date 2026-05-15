@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% comment %}
+This template is reused for three views:
+1. vendor_list — shows all vendors
+2. vendor_approved — filtered to approved only
+3. vendor_expired — filtered to expired certificates only
+The filter_label variable controls the heading text.
+{% endcomment %}
+
+{% block title %}Vendor Directory — Vendor City{% endblock %}
+
+{% block content %}
+
+{# Page heading — shows filter label if filtered, otherwise default title #}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold text-blue-900">
+        {% if filter_label %}
+            {{ filter_label }}
+        {% else %}
+            Vendor Directory
+        {% endif %}
+    </h1>
+    <span class="text-gray-500 text-sm">{{ vendors|length }} vendor(s) found</span>
+</div>
+
+{# Reusable expired certificate warning banner #}
+{% include 'vendors/_expired_banner.html' %}
+
+{# Vendor cards loop #}
+{% for vendor in vendors %}
+    <div class="bg-white rounded-lg shadow-md p-6 mb-4 border-l-4
+        {% if vendor.status == 'approved' %}border-green-500
+        {% elif vendor.status == 'pending' %}border-yellow-500
+        {% else %}border-red-500{% endif %}">
+
+        <div class="flex justify-between items-start">
+            <div>
+                <h2 class="text-xl font-bold text-blue-900">
+                    {{ vendor.company_name }}
+                </h2>
+                <p class="text-gray-500 text-sm">Reg: {{ vendor.registration_number }}</p>
+            </div>
+
+            {# Status badge #}
+            <span class="px-3 py-1 rounded-full text-xs font-bold
+                {% if vendor.status == 'approved' %}bg-green-100 text-green-800
+                {% elif vendor.status == 'pending' %}bg-yellow-100 text-yellow-800
+                {% else %}bg-red-100 text-red-800{% endif %}">
+                {{ vendor.status|upper }}
+            </span>
+        </div>
+
+        <p class="text-gray-600 mt-2">🔧 {{ vendor.services_offered }}</p>
+        <p class="text-gray-600">📧 {{ vendor.email }} | 📞 {{ vendor.phone }}</p>
+
+        {# Certificate expiry warning #}
+        {% if vendor.is_certificate_expired %}
+            <p class="text-red-600 font-semibold mt-2">
+                ⚠️ Certificate Expired: {{ vendor.certificate_name }} ({{ vendor.certificate_expiry }})
+            </p>
+        {% else %}
+            <p class="text-green-600 mt-2">
+                ✅ Certificate Valid: {{ vendor.certificate_name }} (expires {{ vendor.certificate_expiry }})
+            </p>
+        {% endif %}
+
+        {# Rating stars #}
+        <p class="text-yellow-500 mt-1">
+            {% for i in "12345" %}
+                {% if forloop.counter <= vendor.rating %}⭐{% endif %}
+            {% endfor %}
+        </p>
+
+        <a href="{% url 'vendor-detail' vendor.pk %}"
+           class="inline-block mt-3 text-blue-600 hover:underline text-sm font-medium">
+            View Full Profile →
+        </a>
+    </div>
+
+{% empty %}
+    {# Shows when no vendors match the query #}
+    <div class="bg-white rounded-lg shadow p-10 text-center text-gray-500">
+        <p class="text-xl">No vendors found.</p>
+    </div>
+{% endfor %}
+
+{% endblock %}

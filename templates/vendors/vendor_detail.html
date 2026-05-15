@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ vendor.company_name }} — Vendor City{% endblock %}
+
+{% block content %}
+
+{# Back button #}
+<a href="{% url 'vendor-list' %}" class="text-blue-600 hover:underline text-sm mb-6 inline-block">
+    ← Back to Vendor Directory
+</a>
+
+{# Vendor profile card #}
+<div class="bg-white rounded-lg shadow-md p-8 border-l-4
+    {% if vendor.status == 'approved' %}border-green-500
+    {% elif vendor.status == 'pending' %}border-yellow-500
+    {% else %}border-red-500{% endif %}">
+
+    {# Header #}
+    <div class="flex justify-between items-start mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-blue-900">{{ vendor.company_name }}</h1>
+            <p class="text-gray-500 text-sm mt-1">Reg No: {{ vendor.registration_number }}</p>
+        </div>
+        <span class="px-4 py-2 rounded-full text-sm font-bold
+            {% if vendor.status == 'approved' %}bg-green-100 text-green-800
+            {% elif vendor.status == 'pending' %}bg-yellow-100 text-yellow-800
+            {% else %}bg-red-100 text-red-800{% endif %}">
+            {{ vendor.status|upper }}
+        </span>
+    </div>
+
+    {# Contact info #}
+    <div class="grid grid-cols-2 gap-4 mb-6">
+        <div>
+            <p class="text-gray-500 text-xs uppercase font-semibold">Email</p>
+            <p class="text-gray-800">{{ vendor.email }}</p>
+        </div>
+        <div>
+            <p class="text-gray-500 text-xs uppercase font-semibold">Phone</p>
+            <p class="text-gray-800">{{ vendor.phone }}</p>
+        </div>
+        <div>
+            <p class="text-gray-500 text-xs uppercase font-semibold">Address</p>
+            <p class="text-gray-800">{{ vendor.address }}</p>
+        </div>
+        <div>
+            <p class="text-gray-500 text-xs uppercase font-semibold">Date Registered</p>
+            <p class="text-gray-800">{{ vendor.date_registered|date:"F j, Y" }}</p>
+        </div>
+    </div>
+
+    {# Services #}
+    <div class="mb-6">
+        <p class="text-gray-500 text-xs uppercase font-semibold mb-1">Services Offered</p>
+        <p class="text-gray-800 bg-gray-50 p-3 rounded">{{ vendor.services_offered }}</p>
+    </div>
+
+    {# Rating #}
+    <div class="mb-6">
+        <p class="text-gray-500 text-xs uppercase font-semibold mb-1">Vendor Rating</p>
+        <p class="text-yellow-500 text-2xl">
+            {% for i in "12345" %}
+                {% if forloop.counter <= vendor.rating %}⭐{% endif %}
+            {% endfor %}
+            <span class="text-gray-600 text-sm ml-2">{{ vendor.rating }}/5</span>
+        </p>
+    </div>
+
+    {# Certificate status #}
+    <div class="mb-4">
+        <p class="text-gray-500 text-xs uppercase font-semibold mb-2">Certificate Status</p>
+        {% if vendor.is_certificate_expired %}
+            <div class="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded">
+                ⚠️ <strong>EXPIRED:</strong> {{ vendor.certificate_name }} expired on {{ vendor.certificate_expiry }}
+            </div>
+        {% else %}
+            <div class="bg-green-50 border border-green-300 text-green-700 px-4 py-3 rounded">
+                ✅ <strong>VALID:</strong> {{ vendor.certificate_name }} — expires {{ vendor.certificate_expiry }}
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock %}

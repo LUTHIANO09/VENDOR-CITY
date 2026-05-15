@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Vendor Directory Search — Vendor City{% endblock %}
+
+{% block content %}
+
+{# Page header with stats #}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-blue-900 mb-2">🔍 Vendor Directory</h1>
+    <p class="text-gray-500">Search and filter approved oil & gas vendors</p>
+</div>
+
+{# Stats bar #}
+<div class="grid grid-cols-4 gap-4 mb-8">
+    <div class="bg-white rounded-lg shadow p-4 text-center">
+        <p class="text-3xl font-bold text-blue-900">{{ total_count }}</p>
+        <p class="text-gray-500 text-sm">Total Vendors</p>
+    </div>
+    <div class="bg-green-50 rounded-lg shadow p-4 text-center">
+        <p class="text-3xl font-bold text-green-700">{{ approved_count }}</p>
+        <p class="text-gray-500 text-sm">Approved</p>
+    </div>
+    <div class="bg-yellow-50 rounded-lg shadow p-4 text-center">
+        <p class="text-3xl font-bold text-yellow-700">{{ pending_count }}</p>
+        <p class="text-gray-500 text-sm">Pending</p>
+    </div>
+    <div class="bg-red-50 rounded-lg shadow p-4 text-center">
+        <p class="text-3xl font-bold text-red-700">{{ suspended_count }}</p>
+        <p class="text-gray-500 text-sm">Suspended</p>
+    </div>
+</div>
+
+{# Search form #}
+<div class="bg-white rounded-lg shadow p-6 mb-8">
+    <form method="GET" action="{% url 'directory-search' %}">
+        <div class="flex gap-4">
+            <input
+                type="text"
+                name="q"
+                value="{{ query }}"
+                placeholder="Search by company name, service, or certificate..."
+                class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+            <select name="status" class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">All Status</option>
+                <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
+                <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                <option value="suspended" {% if status_filter == 'suspended' %}selected{% endif %}>Suspended</option>
+            </select>
+            <button type="submit" class="bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800">
+                Search
+            </button>
+            {% if query or status_filter %}
+                <a href="{% url 'directory-search' %}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">
+                    Clear
+                </a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+{# Search results #}
+{% if query or status_filter %}
+    <p class="text-gray-500 text-sm mb-4">
+        {{ vendors|length }} result(s)
+        {% if query %}for "<strong>{{ query }}</strong>"{% endif %}
+        {% if status_filter %}with status "<strong>{{ status_filter }}</strong>"{% endif %}
+    </p>
+{% endif %}
+
+{# Vendor results #}
+{% for vendor in vendors %}
+    <div class="bg-white rounded-lg shadow p-6 mb-4 border-l-4
+        {% if vendor.status == 'approved' %}border-green-500
+        {% elif vendor.status == 'pending' %}border-yellow-500
+        {% else %}border-red-500{% endif %}
+        hover:shadow-lg transition-shadow">
+
+        <div class="flex justify-between items-start">
+            <div>
+                <h2 class="text-xl font-bold text-blue-900">{{ vendor.company_name }}</h2>
+                <p class="text-gray-500 text-sm">Reg: {{ vendor.registration_number }}</p>
+            </div>
+            <span class="px-3 py-1 rounded-full text-xs font-bold
+                {% if vendor.status == 'approved' %}bg-green-100 text-green-800
+                {% elif vendor.status == 'pending' %}bg-yellow-100 text-yellow-800
+                {% else %}bg-red-100 text-red-800{% endif %}">
+                {{ vendor.status|upper }}
+            </span>
+        </div>
+
+        <p class="text-gray-600 mt-2">🔧 {{ vendor.services_offered }}</p>
+        <p class="text-gray-600">📧 {{ vendor.email }} | 📞 {{ vendor.phone }}</p>
+
+        {% if vendor.is_certificate_expired %}
+            <p class="text-red-600 text-sm mt-2 font-semibold">
+                ⚠️ Certificate Expired: {{ vendor.certificate_name }}
+            </p>
+        {% else %}
+            <p class="text-green-600 text-sm mt-2">
+                ✅ {{ vendor.certificate_name }} — valid until {{ vendor.certificate_expiry }}
+            </p>
+        {% endif %}
+
+        <a href="{% url 'vendor-detail' vendor.pk %}"
+           class="inline-block mt-3 text-blue-600 hover:underline text-sm font-medium">
+            View Full Profile →
+        </a>
+    </div>
+
+{% empty %}
+    <div class="bg-white rounded-lg shadow p-10 text-center text-gray-500">
+        <p class="text-xl mb-2">No vendors found.</p>
+        <p class="text-sm">Try a different search term or clear the filters.</p>
+    </div>
+{% endfor %}
+
+{% endblock %}
