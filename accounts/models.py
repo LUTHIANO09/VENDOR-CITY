@@ -32,9 +32,10 @@ class CustomUser(AbstractUser):
     # These fix the clash with Django's default auth.User
     groups = models.ManyToManyField(
         'auth.Group',
-        related_name='customuser_set',
+        related_name='customuser_set', # to avoids naming conflicts because from what we extend we already group that may crash with the model
         blank=True
     )
+    #saying many users can belong to this group
     user_permissions = models.ManyToManyField(
         'auth.Permission',
         related_name='customuser_set',
@@ -42,7 +43,7 @@ class CustomUser(AbstractUser):
     )
 
     def __str__(self):
-        return f"{self.username} ({self.get_role_display()})"
+        return f"{self.username} ({self.role})"
 
     @property
     def is_vendor(self):
