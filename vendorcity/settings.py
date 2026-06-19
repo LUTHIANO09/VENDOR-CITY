@@ -26,6 +26,7 @@ SECRET_KEY = 'django-insecure-q0e!w0nuvisi9+m&u5o=lovv1-1+p=ak^e!^if5(w^+a8e!w#z
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    'localhost', '127.0.0.1', '[::1]'
     '.vercel.app',
 ]
 
@@ -95,7 +96,7 @@ import dj_database_url
 from decouple import config
 
 DATABASES = {
-    'default': dj_database_url.config(default=config('OFFLINE_URL'))
+    'default': dj_database_url.config(default=config('DATABASE_URL'))
 }
 
 
